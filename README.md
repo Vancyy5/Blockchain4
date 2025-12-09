@@ -13,9 +13,9 @@ Smulkiausias nuomos transakcijos elementas susideda iš trijų dalių: nuomotoja
 
 Galime vadinti šį modelį: nuoma-turto-iš-nuomotojo arba rentprop
 
-![Verslo modelis](<modeliai/verslomodelis.drawio.png>)
-nuoma-turto-iš-nuomotojo verslo modelis
 
+nuoma-turto-iš-nuomotojo verslo modelis
+![Verslo modelis](<modeliai/verslomodelis.drawio.png>)
 
 # Pavyzdžiai pagal rentprop modelį:
 
@@ -30,8 +30,9 @@ B2B — įranga: Statybų įmonė „GrindCo“ reikalinga krautuvo vienai diena
 # (Išmanusis) Sprendimas
 Kaip matėme verslo atvejo skyriuje, pasitikėjimas tarp šalių yra pagrindinis tradicinio verslo rūpestis. Šio koncepcijos įrodymo tikslas - sukurti be pasitikėjimo sandorių sistemą tarp šalių, naudojant išmaniąją sutartį Ethereum blokų grandinės tinkle.
 
-![Srauto diagramos modelis](<modeliai/srautu diagrama.drawio.png>)
+
 Srautų diagrama su išmaniąja sutartimi
+![Srauto diagramos modelis](<modeliai/srautu diagrama.drawio.png>)
 
 Aprašytas įvykių srautas:
 
@@ -53,10 +54,82 @@ Aprašytas įvykių srautas:
 - Ginčų sprendimas: Integruotas arbitražo mechanizmas
 - Užstato apsauga: Užstatas grąžinamas automatiškai arba paskirstomas pagal arbitro sprendimą
 
-# Techninai Aspektai
+# Techniniai Aspektai
 Išmanioji sutartis Ethereum tinkle užtikrina:
 
 - Saugų lėšų laikymą
 - Automatinį mokėjimų vykdymą
 - Nepriklausomą ginčų sprendimo procesą
 - Skaidrų auditą visiems dalyviams
+
+# Technologijos
+
+- Solidity: ^0.8.20
+- OpenZeppelin: ReentrancyGuard, Pausable
+- Network: Ethereum (Sepolia Testnet)
+- IDE: Remix
+
+# Diegimas
+
+Remix IDE
+
+1. Eiti į [remix.ethereum.org](remix.ethereum.org)
+2. Sukurti naują failą: contracts/RentalContract.sol
+3. Nukopijuoti sutarties kodą iš contract/RentalContract.sol
+4. Compiler: Solidity 0.8.20+
+5. Deploy su parametrais:
+
+_tenant: 0xTenantAddress
+_arbiter: 0xArbiterAddress
+
+# Naudojimo Pavyzdys 
+
+```
+// 1. Nuomininkas užsako nuomą
+await contract.placeOrder(6, "Modern apartment in Vilnius");
+
+// 2. Nuomotojas nustato kainą
+await contract.setPrice(
+  ethers.utils.parseEther("1.0"),  // 1 ETH per mėnesį
+  ethers.utils.parseEther("2.0")   // 2 ETH užstatas
+);
+
+// 3. Nuomininkas moka užstatą + pirmą mėnesį
+await contract.payDeposit({ 
+  value: ethers.utils.parseEther("3.0") 
+});
+
+// 4. Nuomotojas pradeda sutartį
+await contract.startContract();
+
+// 5. Automatiniai mėnesiniai mokėjimai
+await contract.processMonthlyPayment();
+
+// 6. Išsiimti lėšas (withdrawal pattern)
+await contract.withdraw();
+
+```
+# Saugumo Funkcijos
+
+ReentrancyGuard - Apsauga nuo reentrancy atakų
+Withdrawal Pattern - Saugus lėšų išėmimas
+Checks-Effects-Interactions - Saugus state valdymas
+Access Control - Griežta prieigos kontrolė
+Pausable - Emergency pause funkcionalumas
+Dispute Timeout - 30 dienų limitas ginčams
+
+
+# Sutarties Būsenos
+```
+OrderPlaced → PriceSet → DepositPaid → Active → Completed
+                                         ↓
+                                    DisputeActive
+```          
+
+# Testavimas
+Sėkmingai testavau Remix VM (Shanghai) aplinkoje su:
+
+- Normalaus proceso scenarijumi
+- Ginčo sprendimo scenarijumi
+- Timeout mechanizmo testavimu
+- Reentrancy apsaugos testavimu
