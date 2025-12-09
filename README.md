@@ -13,7 +13,8 @@ Smulkiausias nuomos transakcijos elementas susideda iš trijų dalių: nuomotoja
 
 Galime vadinti šį modelį: nuoma-turto-iš-nuomotojo arba rentprop
 
-!! sugeneruoti diagramą.
+![Verslo modelis](<modeliai/verslomodelis.drawio.png>)
+nuoma-turto-iš-nuomotojo verslo modelis
 
 
 # Pavyzdžiai pagal rentprop modelį:
@@ -26,23 +27,23 @@ C2C — įranga: Greta turi profesionalų foto aparatą, kurį naudoja retai. Ji
 
 B2B — įranga: Statybų įmonė „GrindCo“ reikalinga krautuvo vienai dienai. Įrangos nuomos įmonė „EquipRent“ turi tinkamą kraututvą. „GrindCo“ sumoka užstatą ir dienos nuomos mokestį. Po darbo pabaigos, jei įranga grąžinta nesugedusi, užstatas grąžinamas automatiškai.
 
-# (Išmannusis) Sprendimas
+# (Išmanusis) Sprendimas
 Kaip matėme verslo atvejo skyriuje, pasitikėjimas tarp šalių yra pagrindinis tradicinio verslo rūpestis. Šio koncepcijos įrodymo tikslas - sukurti be pasitikėjimo sandorių sistemą tarp šalių, naudojant išmaniąją sutartį Ethereum blokų grandinės tinkle.
 
-!!cia srauto diagramą
+![Srauto diagramos modelis](<modeliai/srautu diagrama.drawio.png>)
+Srautų diagrama su išmaniąja sutartimi
 
 Aprašytas įvykių srautas:
 
 1. Nuomotojas diegia išmaniąją sutartį specialiai Nuomininko paskyriai.
 2. Nuomininkas užsako turto nuomą su nurodyta trukme (pvz., 6 mėnesiams) išmaniojoje sutartyje. Per įvykį order_sent nuomotojas gauna užsakymo duomenis ir gali juos apdoroti.
-3. Nuomotojas nustato nuomos kainą (mėnesinį mokestį) ir užstato dydį.
-4. Nuomotojas išsiunčia kainos pasiūlymą, o Nuomininkas jį gauna per įvykį price_sent.
-5. Nuomininkas atlieka saugų mokėjimą: užstatas + pirmo mėnesio nuoma. Šie kriptovaliutų vienetai patenka į išmaniosios sutarties paskyrą ir ten laukia.
-6. Nuomotojas patvirtina sutarties pradžią ir perduoda turto naudojimo teises. Nuomininkas gauna patvirtinimą per įvykį contract_started.
-7. Išmanioji sutartis automatiškai kiekvieną mėnesį išskaičiuoja nuomos mokestį iš nuomininko paskyros ir perveda nuomotojui.
-8. Jei kyla ginčas, bet kuri šalis gali aktyvuoti Arbitrą. Arbitras išnagrinėja situaciją ir priima sprendimą.
-Sutarčiai pasibaigus, jei nėra žalos ar neišspręstų ginčų, Išmanioji sutartis automatiškai grąžina užstatą Nuomininkui.
-9. Jei arbitras nusprendžia, kad yra žala, Išmanioji sutartis padalina užstatą tarp Nuomotojo (kompensacijai) ir Nuomininko (likutis).
+3. Nuomotojas nustato nuomos kainą (mėnesinį mokestį) ir užstato dydį. Nuomotojas išsiunčia kainos pasiūlymą, o Nuomininkas jį gauna per įvykį price_sent.
+4. Nuomininkas atlieka saugų mokėjimą: užstatas + pirmo mėnesio nuoma. Šie kriptovaliutų vienetai patenka į išmaniosios sutarties paskyrą ir ten laukia.
+5. Nuomotojas patvirtina sutarties pradžią ir perduoda turto naudojimo teises. Nuomininkas gauna patvirtinimą per įvykį contract_started.
+6. Išmanioji sutartis automatiškai kiekvieną mėnesį išskaičiuoja nuomos mokestį iš nuomininko paskyros ir perveda nuomotojui.
+7. Jei kyla ginčas, bet kuri šalis gali aktyvuoti Arbitrą. Arbitras išnagrinėja situaciją ir priima sprendimą.
+8. Sutarčiai pasibaigus, jei nėra žalos ar neišspręstų ginčų, Išmanioji sutartis automatiškai grąžina užstatą Nuomininkui. Jei arbitras nusprendžia, kad yra žala, Išmanioji sutartis padalina užstatą tarp Nuomotojo (kompensacijai) ir Nuomininko (likutis).
+9. Startis uždaroma
 
 # Pagrindinės Savybės
 
