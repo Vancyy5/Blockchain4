@@ -62,7 +62,7 @@ Išmanioji sutartis Ethereum tinkle užtikrina:
 - Nepriklausomą ginčų sprendimo procesą
 - Skaidrų auditą visiems dalyviams
 
-# Technologijos
+# Technologijos Remix
 
 - Solidity: ^0.8.20
 - OpenZeppelin: ReentrancyGuard, Pausable
@@ -80,6 +80,7 @@ Remix IDE
 5. Deploy su parametrais:
 
 _tenant: 0xTenantAddress
+
 _arbiter: 0xArbiterAddress
 
 # Naudojimo Pavyzdys 
@@ -111,12 +112,12 @@ await contract.withdraw();
 ```
 # Saugumo Funkcijos
 
-ReentrancyGuard - Apsauga nuo reentrancy atakų
-Withdrawal Pattern - Saugus lėšų išėmimas
-Checks-Effects-Interactions - Saugus state valdymas
-Access Control - Griežta prieigos kontrolė
-Pausable - Emergency pause funkcionalumas
-Dispute Timeout - 30 dienų limitas ginčams
+- ReentrancyGuard - Apsauga nuo reentrancy atakų
+- Withdrawal Pattern - Saugus lėšų išėmimas
+- Checks-Effects-Interactions - Saugus state valdymas
+- Access Control - Griežta prieigos kontrolė
+- Pausable - Emergency pause funkcionalumas
+- Dispute Timeout - 30 dienų limitas ginčams
 
 
 # Sutarties Būsenos
