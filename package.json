@@ -1,5 +1,24 @@
 {
+  "name": "blockchain4-rental-contract",
+  "version": "1.0.0",
+  "description": "Secure Rental Smart Contract on Ethereum",
+  "scripts": {
+    "test": "truffle test",
+    "compile": "truffle compile",
+    "migrate:dev": "truffle migrate --network development",
+    "migrate:sepolia": "truffle migrate --network sepolia",
+    "console:dev": "truffle console --network development",
+    "console:sepolia": "truffle console --network sepolia",
+    "verify:sepolia": "truffle run verify SecureRentalContract --network sepolia"
+  },
   "dependencies": {
-    "@openzeppelin/contracts": "^5.4.0"
+    "@openzeppelin/contracts": "^5.0.0",
+    "@truffle/hdwallet-provider": "^2.1.15",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "ganache": "^7.9.1",
+    "truffle": "^5.11.5",
+    "truffle-plugin-verify": "^0.6.7"
   }
 }
