@@ -62,6 +62,49 @@ Išmanioji sutartis Ethereum tinkle užtikrina:
 - Nepriklausomą ginčų sprendimo procesą
 - Skaidrų auditą visiems dalyviams
 
+# Sutarties Būsenos
+```
+OrderPlaced → PriceSet → DepositPaid → Active → Completed
+                                         ↓
+                                    DisputeActive
+```          
+```
+       ┌─────────────┐
+       │ OrderPlaced │ ← Deployment (Constructor)
+       └──────┬──────┘
+              │ placeOrder()
+              ▼
+       ┌─────────────┐
+       │  PriceSet   │
+       └──────┬──────┘
+              │ payDeposit()
+              ▼
+       ┌─────────────┐
+       │ DepositPaid │
+       └──────┬──────┘
+              │ startContract()
+              ▼
+       ┌─────────────┐    raiseDispute()    ┌───────────────┐
+       │   Active    │ ───────────────────> │ DisputeActive │
+       └──────┬──────┘                      └───────┬───────┘
+              │                                     │
+              │ processMonthlyPayment()             │ resolveDispute()
+              │ (all months paid)                   │
+              │                                     │
+              ▼                                     ▼
+       ┌─────────────────────────────────────────────┐
+       │              Completed                      │
+       └─────────────────────────────────────────────┘
+```
+## Būsenų aprašymas:
+
+0. **OrderPlaced:** Pradinis statusas po deployment, nuomininkas gali pateikti užsakymą
+1. **PriceSet:** Nuomotojas nustatė kainas, nuomininkas gali mokėti
+2. **DepositPaid:** Užstatas ir pirmas mėnuo sumokėti, laukiama patvirtinimo
+3. **Active:** Sutartis aktyvi, vyksta automatiniai mėnesiniai mokėjimai
+4. **DisputeActive:** Vyksta ginčas, laukiama arbitro sprendimo
+5. **Completed:** Sutartis užbaigta, užstatas paskirstytas
+
 # Technologijos 
 
 ## Vystymo Aplinka
@@ -70,7 +113,7 @@ Išmanioji sutartis Ethereum tinkle užtikrina:
 - **OpenZeppelin:** ReentrancyGuard (v5.x)
 - **Truffle Suite:** v5.11.5
 - **Ganache:** v7.9.1 (lokalus tesavimo tinklas)
-- **Node.js:** v18.20.8 LTS
+- **Node.js:** v20.19.6 LTS
 - **IDE:** VS Code / Remix
 
 ## Alternatyvios Aplinkos
@@ -81,7 +124,7 @@ Išmanioji sutartis Ethereum tinkle užtikrina:
 ## 1. Aplinkos Paruošimas
 
 ### Reikalingos programos:
-- Node.js v18.x LTS: https://nodejs.org/
+- Node.js v20.x LTS: https://nodejs.org/
 - Git: https://git-scm.com/
 
 ### Projekto klonavimas:
@@ -136,7 +179,7 @@ truffle migrate --network development
 truffle migrate --reset --network development
 ```
 
-## 4. Testavimas
+## 4. Testavimas Truffle
 
 ### Automatiniai testai:
 ```bash
@@ -186,19 +229,27 @@ console.log("Is Active:", info._isActive)
 .exit
 ```
 
-## Remix IDE (Alternatyva)
+## Remix IDE (Alternatyva) (Solitidy)
 
 1. Eiti į [remix.ethereum.org](remix.ethereum.org)
 2. Sukurti naują failą: contracts/RentalContract.sol
 3. Nukopijuoti sutarties kodą iš contract/RentalContract.sol
 4. Compiler: Solidity 0.8.20+
-5. Deploy su parametrais:
+5. Deploy su parametrais
+constructor(
+    0x5B38Da6a701c568545dCfcB03FcB875f56beddC4,  // tenant
+    0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2   // arbiter
+)
 
-_tenant: 0xTenantAddress
+6. Iškvieskite funkcijas per Remix UI
+placeOrder(6, "Modern apartment")
+setPrice(1000000000000000000, 2000000000000000000)  // 1 ETH, 2 ETH
+payDeposit() // Su value: 3000000000000000000 (3 ETH)
+startContract()
 
-_arbiter: 0xArbiterAddress
+# Naudojimo Pavyzdys 
 
-# Naudojimo Pavyzdys
+Truffle konsolėje galite naudoti šias funkcijas:
 
 ## JavaScript (Truffle Console):
 
@@ -239,22 +290,6 @@ await contract.withdraw({from: landlord});
 await contract.withdraw({from: tenant});
 ```
 
-## Solidity (Remix):
-
-```solidity
-// 1. Deploy su parametrais
-constructor(
-    0x5B38Da6a701c568545dCfcB03FcB875f56beddC4,  // tenant
-    0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2   // arbiter
-)
-
-// 2. Iškvieskite funkcijas per Remix UI
-placeOrder(6, "Modern apartment")
-setPrice(1000000000000000000, 2000000000000000000)  // 1 ETH, 2 ETH
-payDeposit() // Su value: 3000000000000000000 (3 ETH)
-startContract()
-```
-
 # Saugumo Funkcijos
 
 - ReentrancyGuard - Apsauga nuo reentrancy atakų
@@ -264,51 +299,35 @@ startContract()
 - Pausable - Emergency pause funkcionalumas
 - Dispute Timeout - 30 dienų limitas ginčams
 
-
-# Sutarties Būsenos
-```
-OrderPlaced → PriceSet → DepositPaid → Active → Completed
-                                         ↓
-                                    DisputeActive
-```          
-```
-       ┌─────────────┐
-       │ OrderPlaced │ ← Deployment (Constructor)
-       └──────┬──────┘
-              │ placeOrder()
-              ▼
-       ┌─────────────┐
-       │  PriceSet   │
-       └──────┬──────┘
-              │ payDeposit()
-              ▼
-       ┌─────────────┐
-       │ DepositPaid │
-       └──────┬──────┘
-              │ startContract()
-              ▼
-       ┌─────────────┐    raiseDispute()    ┌───────────────┐
-       │   Active    │ ───────────────────> │ DisputeActive │
-       └──────┬──────┘                      └───────┬───────┘
-              │                                     │
-              │ processMonthlyPayment()             │ resolveDispute()
-              │ (all months paid)                   │
-              │                                     │
-              ▼                                     ▼
-       ┌─────────────────────────────────────────────┐
-       │              Completed                      │
-       └─────────────────────────────────────────────┘
-```
-## Būsenų aprašymas:
-
-0. **OrderPlaced:** Pradinis statusas po deployment, nuomininkas gali pateikti užsakymą
-1. **PriceSet:** Nuomotojas nustatė kainas, nuomininkas gali mokėti
-2. **DepositPaid:** Užstatas ir pirmas mėnuo sumokėti, laukiama patvirtinimo
-3. **Active:** Sutartis aktyvi, vyksta automatiniai mėnesiniai mokėjimai
-4. **DisputeActive:** Vyksta ginčas, laukiama arbitro sprendimo
-5. **Completed:** Sutartis užbaigta, užstatas paskirstytas
-
 # Testavimas
+
+Galima bandyti šiuos kelius:
+
+1. **Happy Path:**
+   - Deployment → Order → Price → Payment → Start → Monthly Payments → Complete
+   - Rezultatas: Užstatas grąžintas tenant, visi mokėjimai landlord
+
+2. **Ginčo Scenarijus:**
+   - Active → Raise Dispute → Arbiter Resolves (50/50) → Funds Withdrawn
+   - Rezultatas: Užstatas padalintas 50/50
+
+3. **Dispute Timeout:**
+   - Active → Raise Dispute → Wait 30+ days → Force Complete
+   - Rezultatas: Užstatas grąžintas tenant automatiškai
+
+4. **Reentrancy Apsauga:**
+   - Bandymas atakuoti payDeposit() ir withdraw()
+   - Rezultatas: Transakcija atmesta su "ReentrancyGuard" klaida
+
+5. **Access Control:**
+   - Bandymas kviesti funkcijas iš neteisingo account
+   - Rezultatas: "Only landlord/tenant/arbiter" klaida
+
+6. **Edge Cases:**
+   - Neteisingi input parametrai
+   - Nepakankamas balansas
+   - Neteisingas contract status
+   - Rezultatas: Visi atmetami su aiškiais error messages
 
 ## 1. Unit Testai
 
@@ -360,70 +379,9 @@ let accounts = await web3.eth.getAccounts()
 // 1-9 žingsniai kaip nurodyta "Naudojimo Pavyzdys" skyriuje
 ```
 
-## Remix Testavimas
+## Remix Testavimas (Alternatyva)
 
-Sėkmingai testavau Remix VM (Shanghai) aplinkoje:
-
-1. **Happy Path:**
-   - Deployment → Order → Price → Payment → Start → Monthly Payments → Complete
-   - Rezultatas: Užstatas grąžintas tenant, visi mokėjimai landlord
-
-2. **Ginčo Scenarijus:**
-   - Active → Raise Dispute → Arbiter Resolves (50/50) → Funds Withdrawn
-   - Rezultatas: Užstatas padalintas 50/50
-
-3. **Dispute Timeout:**
-   - Active → Raise Dispute → Wait 30+ days → Force Complete
-   - Rezultatas: Užstatas grąžintas tenant automatiškai
-
-4. **Reentrancy Apsauga:**
-   - Bandymas atakuoti payDeposit() ir withdraw()
-   - Rezultatas: Transakcija atmesta su "ReentrancyGuard" klaida
-
-5. **Access Control:**
-   - Bandymas kviesti funkcijas iš neteisingo account
-   - Rezultatas: "Only landlord/tenant/arbiter" klaida
-
-6. **Edge Cases:**
-   - Neteisingi input parametrai
-   - Nepakankamas balansas
-   - Neteisingas contract status
-   - Rezultatas: Visi atmetami su aiškiais error messages
-
-# Problemos ir Sprendimai
-
-1. Sena `ganache-cli` versija (v6.x) nesuderinama su Solidity 0.8.20
-
-**Sprendimas:**
-```bash
-npm uninstall -g ganache-cli
-npm install -g ganache
-ganache --port 8545
-```
-
-2. Truffle v5.11.5 nevisiškai suderinama su Node.js v24.x
-
-**Sprendimas:** Naudoti Node.js v18.x LTS
-```bash
-# Parsisiųsti ir įdiegti Node.js v18.20.8 LTS
-node --version  # Patikrinti: v18.20.8
-```
-
-3. OpenZeppelin v5.x pakeitė failų struktūrą
-
-**Sprendimas:**
-```solidity
-// TEISINGAI (v5.x)
-import "@openzeppelin/contracts/**utils**/ReentrancyGuard.sol";
-
-// BLOGAI 
-import "@openzeppelin/contracts/**security**/ReentrancyGuard.sol";
-```
-4. Ganache nepaleistas arba naudoja kitą portą
-
-**Sprendimas:**
-1. Patikrinti ar Ganache veikia: `netstat -ano | findstr :8545`
-2. Paleisti Ganache: `ganache --port 8545`
+Sėkmingai testavau Remix VM (Shanghai) aplinkoje.
 
 # Deployment į Sepolia Testinį Tinklą
 
@@ -579,7 +537,9 @@ Transaction: https://sepolia.etherscan.io/tx/TX_HASH
 
 # Etherscan
 
-## 1. Kaip Sukurti Transakcijas
+## 1. Kaip Sukurti Transakcijas?
+
+Transakcijas galima sukurti šiais metodais:
 
 ### Metodas 1: Etherscan UI 
 
@@ -628,34 +588,7 @@ mano: https://sepolia.etherscan.io/address/0xE12d50b06Ea692d69d61163947565A29a47
 
 ### Metodas 2.1: Truffle Console patiems
 
-```bash
-truffle console --network sepolia
-```
-
-```javascript
-// Setup
-let contract = await SecureRentalContract.deployed()
-let accounts = await web3.eth.getAccounts()
-
-// Gauti adresus
-let landlord = await contract.landlord()
-let tenant = await contract.tenant()
-
-console.log("Landlord:", landlord)
-console.log("Tenant:", tenant)
-
-
-// Landlord funkcijos:
-await contract.setPrice(
-  web3.utils.toWei("0.01", "ether"),
-  web3.utils.toWei("0.02", "ether"),
-  {from: landlord}
-)
-
-await contract.startContract({from: landlord})
-
-.exit
-```
+Kaip anksčiau parodyta naudojimo pavyzdyje.
 
 ### Metodas 2.2: Truffle Console su test_sepolia
 
@@ -735,7 +668,6 @@ npm install -g serve
 ![dapp](<nuotraukos/Screenshot 2025-12-17 190320.png>)
 ![dapp](<nuotraukos/Screenshot 2025-12-17 190416.png>)
 ![dapp](<nuotraukos/Screenshot 2025-12-17 190517.png>)
-![dapp](<nuotraukos/Screenshot 2025-12-17 190712.png>)
 ![dapp](<nuotraukos/Screenshot 2025-12-17 193927.png>)
 ![dapp](<nuotraukos/Screenshot 2025-12-17 193008.png>)
 
