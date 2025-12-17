@@ -1,0 +1,850 @@
+[
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_tenant",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_arbiter",
+				"type": "address"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [],
+		"name": "EnforcedPause",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "ExpectedPause",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "ReentrancyGuardReentrantCall",
+		"type": "error"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "arbiter",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "landlordAmount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "tenantAmount",
+				"type": "uint256"
+			}
+		],
+		"name": "ArbitrationDecision",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "depositReturned",
+				"type": "uint256"
+			}
+		],
+		"name": "ContractCompleted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "by",
+				"type": "address"
+			}
+		],
+		"name": "ContractPaused",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "startTime",
+				"type": "uint256"
+			}
+		],
+		"name": "ContractStarted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "by",
+				"type": "address"
+			}
+		],
+		"name": "ContractUnpaused",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "tenant",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "DepositPaid",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "raisedBy",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			}
+		],
+		"name": "DisputeRaised",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "landlordShare",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "tenantShare",
+				"type": "uint256"
+			}
+		],
+		"name": "DisputeResolved",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "recipient",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "FundsWithdrawn",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "month",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "MonthlyPaymentProcessed",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "tenant",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "durationMonths",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "description",
+				"type": "string"
+			}
+		],
+		"name": "OrderSent",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "Paused",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "monthlyRent",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "deposit",
+				"type": "uint256"
+			}
+		],
+		"name": "PriceSent",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "Unpaused",
+		"type": "event"
+	},
+	{
+		"stateMutability": "payable",
+		"type": "fallback"
+	},
+	{
+		"inputs": [],
+		"name": "DISPUTE_TIMEOUT",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "MAX_DURATION_MONTHS",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "PAYMENT_INTERVAL",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "arbiter",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "completeContract",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "deposit",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "disputeRaisedAt",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "durationMonths",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "forceCompleteAfterDisputeTimeout",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getBalance",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "total",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "available",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "locked",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getContractInfo",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "_landlord",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_tenant",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_arbiter",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_monthlyRent",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_deposit",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_durationMonths",
+				"type": "uint256"
+			},
+			{
+				"internalType": "enum SecureRentalContract.ContractStatus",
+				"name": "_status",
+				"type": "uint8"
+			},
+			{
+				"internalType": "bool",
+				"name": "_isActive",
+				"type": "bool"
+			},
+			{
+				"internalType": "bool",
+				"name": "_isDisputeActive",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getDisputeInfo",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "_isDisputeActive",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_disputeRaisedAt",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_disputeTimeoutAt",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "_canForceComplete",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getPaymentInfo",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "_paidMonths",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_remainingMonths",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_contractBalance",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_availableBalance",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_nextPaymentDue",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_address",
+				"type": "address"
+			}
+		],
+		"name": "getWithdrawableAmount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "isActive",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "isCompleted",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "isDisputeActive",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "isPaymentDue",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "isPriceSet",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "landlord",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "lastPaymentTime",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "monthlyRent",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "paidMonths",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "pause",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "paused",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "payDeposit",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "pendingWithdrawals",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_durationMonths",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_description",
+				"type": "string"
+			}
+		],
+		"name": "placeOrder",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "processMonthlyPayment",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "propertyDescription",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "raiseDispute",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_landlordSharePercent",
+				"type": "uint256"
+			}
+		],
+		"name": "resolveDispute",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_monthlyRent",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_deposit",
+				"type": "uint256"
+			}
+		],
+		"name": "setPrice",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "startContract",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "startTime",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "status",
+		"outputs": [
+			{
+				"internalType": "enum SecureRentalContract.ContractStatus",
+				"name": "",
+				"type": "uint8"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "tenant",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "topUpBalance",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "unpause",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "withdraw",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"stateMutability": "payable",
+		"type": "receive"
+	}
+]

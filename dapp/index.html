@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RentChain - Decentralizuota Nuomos Platforma</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @keyframes slide-in{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+        @keyframes fade-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .animate-slide-in{animation:slide-in .3s ease-out}
+        .animate-fade-in{animation:fade-in .5s ease-out}
+        .gradient-bg{background:linear-gradient(135deg,#E5E9C5 0%,#fff 50%,#9ECFD4 100%)}
+        .gradient-primary{background:linear-gradient(135deg,#016B61 0%,#70B2B2 100%)}
+        .hover-scale{transition:transform .3s ease}
+        .hover-scale:hover{transform:scale(1.05)}
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    
+    <div id="notification" class="hidden fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg animate-slide-in text-white">
+        <div class="flex items-center gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5"></i>
+            <span id="notification-message"></span>
+        </div>
+    </div>
+
+    <header class="bg-white/80 backdrop-blur-md shadow-lg sticky top-0 z-40 border-b-4 border-[#016B61]">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="gradient-primary p-3 rounded-xl shadow-lg hover-scale">
+                        <i data-lucide="home" class="text-white w-8 h-8"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold bg-gradient-to-r from-[#016B61] to-[#70B2B2] bg-clip-text text-transparent">
+                            RentChain
+                        </h1>
+                        <p class="text-sm text-gray-600">Decentralizuota Nuomos Sistema</p>
+                    </div>
+                </div>
+
+                <nav class="hidden md:flex items-center gap-4">
+                    <button onclick="setActiveTab('dashboard')" id="tab-dashboard" class="px-4 py-2 rounded-lg font-medium transition-all bg-[#016B61] text-white shadow-lg">
+                        Dashboard
+                    </button>
+                    <button onclick="setActiveTab('actions')" id="tab-actions" class="px-4 py-2 rounded-lg font-medium transition-all text-gray-700 hover:bg-[#E5E9C5]">
+                        Veiksmai
+                    </button>
+                    <button onclick="setActiveTab('history')" id="tab-history" class="px-4 py-2 rounded-lg font-medium transition-all text-gray-700 hover:bg-[#E5E9C5]">
+                        Istorija
+                    </button>
+                    <button onclick="setActiveTab('info')" id="tab-info" class="px-4 py-2 rounded-lg font-medium transition-all text-gray-700 hover:bg-[#E5E9C5]">
+                        Info
+                    </button>
+                </nav>
+
+                <div class="flex items-center gap-4">
+                    <div id="wallet-connected" class="hidden md:flex items-center gap-3 gradient-primary text-white px-6 py-3 rounded-xl shadow-lg">
+                        <i data-lucide="wallet" class="w-5 h-5"></i>
+                        <div>
+                            <p class="text-xs opacity-80">Prisijungęs</p>
+                            <p class="font-mono text-sm" id="wallet-address"></p>
+                        </div>
+                    </div>
+                    <button id="wallet-connect-btn" onclick="connectWallet()" class="hidden md:flex items-center gap-2 gradient-primary text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl hover-scale">
+                        <i data-lucide="wallet" class="w-5 h-5"></i>
+                        Prijungti Piniginę
+                    </button>
+                    
+                    <button onclick="toggleMobileMenu()" class="md:hidden bg-[#016B61] text-white p-2 rounded-lg">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="mobile-menu" class="hidden md:hidden mt-4 space-y-2 pb-4">
+                <button onclick="setActiveTab('dashboard'); toggleMobileMenu();" class="w-full px-4 py-3 rounded-lg text-left font-medium bg-[#016B61] text-white">
+                    Dashboard
+                </button>
+                <button onclick="setActiveTab('actions'); toggleMobileMenu();" class="w-full px-4 py-3 rounded-lg text-left font-medium bg-[#E5E9C5] text-gray-700">
+                    Veiksmai
+                </button>
+                <button onclick="setActiveTab('history'); toggleMobileMenu();" class="w-full px-4 py-3 rounded-lg text-left font-medium bg-[#E5E9C5] text-gray-700">
+                    Istorija
+                </button>
+                <button onclick="setActiveTab('info'); toggleMobileMenu();" class="w-full px-4 py-3 rounded-lg text-left font-medium bg-[#E5E9C5] text-gray-700">
+                    Info
+                </button>
+                <button onclick="connectWallet()" class="w-full flex items-center justify-center gap-2 gradient-primary text-white px-6 py-3 rounded-xl font-semibold">
+                    <i data-lucide="wallet" class="w-5 h-5"></i>
+                    Prijungti Piniginę
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <div id="welcome-screen">
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-white rounded-3xl shadow-2xl p-12 mb-8 text-center hover-scale">
+                    <div class="gradient-primary w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
+                        <i data-lucide="shield" class="text-white w-12 h-12"></i>
+                    </div>
+                    <h2 class="text-4xl font-bold mb-4 bg-gradient-to-r from-[#016B61] to-[#70B2B2] bg-clip-text text-transparent">
+                        Sveiki atvykę į RentChain
+                    </h2>
+                    <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+                        Decentralizuota nuomos sutarčių valdymo sistema, veikianti Ethereum blockchain tinkle
+                    </p>
+                    <button onclick="connectWallet()" class="gradient-primary text-white px-8 py-4 rounded-xl text-lg font-semibold shadow-xl hover:shadow-2xl hover-scale">
+                        Pradėti Naudotis
+                    </button>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-2">
+                        <div class="bg-[#E5E9C5] w-16 h-16 rounded-xl flex items-center justify-center mb-4">
+                            <i data-lucide="shield" class="text-[#016B61] w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-[#016B61] mb-2">Saugumas</h3>
+                        <p class="text-gray-600">Išmaniosios sutartys užtikrina automatinį ir saugų lėšų valdymą</p>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-2">
+                        <div class="bg-[#9ECFD4] w-16 h-16 rounded-xl flex items-center justify-center mb-4">
+                            <i data-lucide="zap" class="text-[#016B61] w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-[#016B61] mb-2">Automatizacija</h3>
+                        <p class="text-gray-600">Mėnesiniai mokėjimai vykdomi automatiškai pagal sutartį</p>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-2">
+                        <div class="bg-[#70B2B2] w-16 h-16 rounded-xl flex items-center justify-center mb-4">
+                            <i data-lucide="trending-up" class="text-white w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-[#016B61] mb-2">Skaidrumas</h3>
+                        <p class="text-gray-600">Visos transakcijos matomos ir patikrinamos blockchain'e</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="main-content" class="hidden space-y-6">
+            <div id="role-badge" class="bg-white rounded-2xl shadow-lg p-6">
+                <div class="flex items-center justify-between flex-wrap gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="gradient-primary w-16 h-16 rounded-xl flex items-center justify-center">
+                            <i data-lucide="users" class="text-white w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Jūsų rolė:</p>
+                            <p class="text-2xl font-bold text-[#016B61] capitalize" id="user-role"></p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-600">Sutarties būsena:</p>
+                        <div class="flex items-center gap-2 mt-1">
+                            <div class="w-3 h-3 rounded-full" id="status-dot"></div>
+                            <p class="text-xl font-bold" id="status-text"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="content-dashboard" class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+                    <div class="flex items-center justify-between mb-4">
+                        <i data-lucide="file-text" class="text-[#016B61] w-8 h-8"></i>
+                        <div class="bg-[#E5E9C5] px-3 py-1 rounded-full">
+                            <p class="text-xs font-semibold text-[#016B61]">Mėnesinis</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-1">Nuomos mokestis</p>
+                    <p class="text-2xl font-bold text-[#016B61]" id="monthly-rent">0 ETH</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+                    <div class="flex items-center justify-between mb-4">
+                        <i data-lucide="shield" class="text-[#70B2B2] w-8 h-8"></i>
+                        <div class="bg-[#9ECFD4] px-3 py-1 rounded-full">
+                            <p class="text-xs font-semibold text-[#016B61]">Užstatas</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-1">Užstato suma</p>
+                    <p class="text-2xl font-bold text-[#70B2B2]" id="deposit-amount">0 ETH</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+                    <div class="flex items-center justify-between mb-4">
+                        <i data-lucide="clock" class="text-[#9ECFD4] w-8 h-8"></i>
+                        <div class="bg-[#E5E9C5] px-3 py-1 rounded-full">
+                            <p class="text-xs font-semibold text-[#016B61]">Trukmė</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-1">Sutarties laikotarpis</p>
+                    <p class="text-2xl font-bold text-[#016B61]" id="duration-months">0 mėn.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+                    <div class="flex items-center justify-between mb-4">
+                        <i data-lucide="check-circle" class="text-[#016B61] w-8 h-8"></i>
+                        <div class="bg-[#70B2B2] px-3 py-1 rounded-full">
+                            <p class="text-xs font-semibold text-white">Pažanga</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-1">Sumokėti kartai</p>
+                    <p class="text-2xl font-bold text-[#016B61]" id="paid-months">0/0</p>
+                </div>
+            </div>
+
+            <div id="content-actions" class="hidden space-y-6">
+                <div id="action-place-order" class="hidden bg-white rounded-2xl p-8 shadow-lg">
+                    <h3 class="text-2xl font-bold text-[#016B61] mb-6 flex items-center gap-2">
+                        <i data-lucide="file-text" class="w-7 h-7"></i>Pateikti Užsakymą
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Trukmė (mėnesiais)</label>
+                            <input type="number" id="order-months" value="6" min="1" class="w-full px-4 py-3 border-2 border-[#9ECFD4] rounded-xl focus:border-[#016B61] focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Aprašymas</label>
+                            <textarea id="order-description" rows="3" placeholder="Pvz.: Modernus 2 kambarių butas Vilniuje" class="w-full px-4 py-3 border-2 border-[#9ECFD4] rounded-xl focus:border-[#016B61] focus:outline-none"></textarea>
+                        </div>
+                        <button onclick="placeOrder()" class="w-full gradient-primary text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl hover-scale">
+                            Pateikti Užsakymą
+                        </button>
+                    </div>
+                </div>
+
+                <div id="action-set-price" class="hidden bg-white rounded-2xl p-8 shadow-lg">
+                    <h3 class="text-2xl font-bold text-[#016B61] mb-6 flex items-center gap-2">
+                        <i data-lucide="dollar-sign" class="w-7 h-7"></i>Nustatyti Kainą
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Mėnesinis mokestis (ETH)</label>
+                            <input type="number" id="price-rent" step="0.001" placeholder="0.01" class="w-full px-4 py-3 border-2 border-[#9ECFD4] rounded-xl focus:border-[#016B61] focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Užstato suma (ETH)</label>
+                            <input type="number" id="price-deposit" step="0.001" placeholder="0.02" class="w-full px-4 py-3 border-2 border-[#9ECFD4] rounded-xl focus:border-[#016B61] focus:outline-none">
+                        </div>
+                        <button onclick="setPrice()" class="w-full gradient-primary text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl hover-scale">
+                            Nustatyti Kainą
+                        </button>
+                    </div>
+                </div>
+
+                <div id="action-pay-deposit" class="hidden bg-white rounded-2xl p-8 shadow-lg">
+                    <h3 class="text-2xl font-bold text-[#016B61] mb-6 flex items-center gap-2">
+                        <i data-lucide="wallet" class="w-7 h-7"></i>Sumokėti Užstatą
+                    </h3>
+                    <div class="bg-[#E5E9C5] rounded-xl p-6 mb-6">
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <p class="text-sm text-gray-600">Mėnesinis mokestis</p>
+                                <p class="text-xl font-bold text-[#016B61]" id="pay-monthly-rent">0 ETH</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Užstatas</p>
+                                <p class="text-xl font-bold text-[#016B61]" id="pay-deposit-amount">0 ETH</p>
+                            </div>
+                        </div>
+                        <div class="border-t-2 border-[#016B61] pt-4">
+                            <p class="text-sm text-gray-600">Iš viso mokėti</p>
+                            <p class="text-3xl font-bold text-[#016B61]" id="pay-total">0 ETH</p>
+                        </div>
+                    </div>
+                    <button onclick="payDeposit()" class="w-full gradient-primary text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl hover-scale">
+                        Sumokėti
+                    </button>
+                </div>
+                 
+                <!-- Pridėti po action-pay-deposit -->
+<div id="action-tenant-payment" class="hidden bg-white rounded-2xl p-8 shadow-lg">
+    <h3 class="text-2xl font-bold text-[#016B61] mb-6 flex items-center gap-2">
+        <i data-lucide="credit-card" class="w-7 h-7"></i>Mėnesinis Mokėjimas
+    </h3>
+    
+    <div class="bg-[#E5E9C5] rounded-xl p-6 mb-6">
+        <p class="text-sm text-gray-600 mb-2">Būsena:</p>
+        <p id="payment-status" class="text-lg font-semibold mb-4">Tikrinama...</p>
+        
+        <div class="border-t-2 border-[#016B61] pt-4">
+            <p class="text-sm text-gray-600">Mokėti sumą:</p>
+            <p class="text-3xl font-bold text-[#016B61]" id="tenant-next-payment">0 ETH</p>
+        </div>
+    </div>
+    
+    <div class="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-4 mb-6">
+        <p class="text-sm text-yellow-800">
+            <strong>Svarbu:</strong> Mokėjimas galimas tik praėjus 30 dienų nuo paskutinio mokėjimo.
+        </p>
+    </div>
+    
+    <button onclick="payMonthlyRent()" class="w-full gradient-primary text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl hover-scale">
+        Sumokėti Nuomą
+    </button>
+</div>
+                <div id="action-start-contract" class="hidden bg-white rounded-2xl p-8 shadow-lg">
+                    <h3 class="text-2xl font-bold text-[#016B61] mb-6 flex items-center gap-2">
+                        <i data-lucide="play-circle" class="w-7 h-7"></i>Pradėti Sutartį
+                    </h3>
+                    <p class="text-gray-600 mb-6">Nuomininkas sumokėjo užstatą ir pirmą mėnesį. Galite pradėti sutartį.</p>
+                    <button onclick="startContract()" class="w-full gradient-primary text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl hover-scale">
+                        Pradėti Sutartį
+                    </button>
+                </div>
+
+                <div id="action-process-payment" class="hidden bg-white rounded-2xl p-8 shadow-lg">
+                    <h3 class="text-2xl font-bold text-[#016B61] mb-6 flex items-center gap-2">
+                        <i data-lucide="credit-card" class="w-7 h-7"></i>Apdoroti Mėnesinį Mokėjimą
+                    </h3>
+                    <div class="bg-[#E5E9C5] rounded-xl p-6 mb-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-sm text-gray-600">Sumokėta mėnesių</p>
+                                <p class="text-2xl font-bold text-[#016B61]" id="process-paid-months">0</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Iš viso mėnesių</p>
+                                <p class="text-2xl font-bold text-[#016B61]" id="process-total-months">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="processMonthlyPayment()" class="w-full gradient-primary text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl hover-scale">
+                        Apdoroti Mokėjimą
+                    </button>
+                </div>
+
+             <div id="action-common" class="hidden grid md:grid-cols-2 gap-6">
+                    <div id="dispute-section" class="bg-white rounded-2xl p-8 shadow-lg">
+                        <h3 class="text-2xl font-bold text-[#016B61] mb-6 flex items-center gap-2">
+                            <i data-lucide="alert-circle" class="w-7 h-7"></i>Kelti Ginčą
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Ginčo priežastis</label>
+                                <textarea id="dispute-reason" rows="3" placeholder="Aprašykite problemą..." class="w-full px-4 py-3 border-2 border-[#9ECFD4] rounded-xl focus:border-[#016B61] focus:outline-none"></textarea>
+                            </div>
+                            <button onclick="raiseDispute()" class="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl hover-scale">
+                                Pateikti Ginčą
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-8 shadow-lg">
+                        <h3 class="text-2xl font-bold text-[#016B61] mb-6 flex items-center gap-2">
+                            <i data-lucide="wallet" class="w-7 h-7"></i>Išsiimti Lėšas
+                        </h3>
+                        <p class="text-gray-600 mb-6">Išsiimkite savo turimas lėšas iš sutarties.</p>
+                        <button onclick="withdraw()" class="w-full gradient-primary text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl hover-scale">
+                            Išsiimti Lėšas
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+<div id="action-arbiter" class="hidden bg-white rounded-2xl p-8 shadow-lg">
+                    <h3 class="text-2xl font-bold text-[#016B61] mb-6 flex items-center gap-2">
+                        <i data-lucide="scale" class="w-7 h-7"></i>Išspręsti Ginčą (Arbitras)
+                    </h3>
+                    <div class="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-4 mb-6">
+                        <p class="text-sm text-yellow-800">
+                            <strong>Dėmesio:</strong> Kaip arbitras, jūs sprendžiate ginčą tarp nuomotojo ir nuomininko. Nurodykite, kokią užstato dalį (%) turėtų gauti nuomotojas.
+                        </p>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nuomotojo dalis (%)</label>
+                            <input type="number" id="landlord-share" min="0" max="100" value="50" class="w-full px-4 py-3 border-2 border-[#9ECFD4] rounded-xl focus:border-[#016B61] focus:outline-none">
+                            <p class="text-xs text-gray-500 mt-2">0% = visas užstatas nuomininkui, 100% = visas užstatas nuomotojui</p>
+                        </div>
+                        <button onclick="resolveDispute()" class="w-full gradient-primary text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl hover-scale">
+                            Patvirtinti Sprendimą
+                        </button>
+                    </div>
+                </div>
+
+            <div id="content-history" class="hidden space-y-6">
+                <div class="bg-white rounded-2xl p-8 shadow-lg">
+                    <h3 class="text-2xl font-bold text-[#016B61] mb-6 flex items-center gap-2">
+                        <i data-lucide="history" class="w-7 h-7"></i>Transakcijų Istorija
+                    </h3>
+                    <div id="history-list" class="space-y-4">
+                        <div class="text-center py-12 text-gray-500">
+                            <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-4 opacity-50"></i>
+                            <p>Nėra įvykdytų veiksmų</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="content-info" class="hidden space-y-6">
+                <div class="bg-white rounded-2xl p-8 shadow-lg">
+                    <h3 class="text-2xl font-bold text-[#016B61] mb-6">Sutarties Informacija</h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <p class="text-sm text-gray-600 mb-1">Sutarties Adresas</p>
+                            <p class="font-mono text-sm bg-[#E5E9C5] px-4 py-2 rounded-lg break-all" id="info-contract-address"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600 mb-1">Tinklas</p>
+                            <p class="font-semibold text-[#016B61]">Sepolia Testnet</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gradient-primary rounded-2xl p-8 shadow-lg text-white">
+    <h3 class="text-2xl font-bold mb-4 flex items-center gap-2">
+        <i data-lucide="plus-circle" class="w-7 h-7"></i>Valdyti Sutartis
+    </h3>
+    <p class="mb-6 opacity-90">Sukurkite naują sutartį arba perjunkite į kitą esamą sutartį</p>
+    
+    <div class="space-y-3">
+        <button onclick="openDeployModal()" class="w-full bg-white text-[#016B61] px-6 py-3 rounded-xl font-semibold hover:shadow-xl hover-scale">
+            <i data-lucide="rocket" class="w-5 h-5 inline mr-2"></i>
+            Deploy Naują Sutartį
+        </button>
+        
+        <div class="bg-white/10 rounded-xl p-4">
+            <p class="text-sm mb-2 font-semibold">Arba perjungti į esamą:</p>
+            <input type="text" id="switch-contract-input" placeholder="0x... (contract address)" class="w-full px-4 py-2 rounded-lg text-gray-800 text-sm font-mono mb-2">
+            <button onclick="quickSwitchContract()" class="w-full bg-[#70B2B2] px-4 py-2 rounded-lg font-semibold hover:bg-[#5a9999]">
+                Perjungti
+            </button>
+        </div>
+    </div>
+</div>
+                    
+    </main>
+   <div id="deploy-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-8">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold text-[#016B61] flex items-center gap-2">
+                    <i data-lucide="rocket" class="w-7 h-7"></i>Deploy Naują Sutartį
+                </h3>
+                <button onclick="closeDeployModal()" class="text-gray-500 hover:text-gray-700">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-4">
+                    <p class="text-sm text-yellow-800">
+                        <strong>Dėmesio:</strong> Būsite nukreipti į Remix IDE, kur galėsite deploy'inti sutartį. Po deploy'inimo grįžkite čia ir įveskite naują contract address.
+                    </p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nuomininko adresas</label>
+                    <input type="text" id="deploy-tenant" placeholder="0x..." class="w-full px-4 py-3 border-2 border-[#9ECFD4] rounded-xl focus:border-[#016B61] focus:outline-none font-mono text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Arbitro adresas</label>
+                    <input type="text" id="deploy-arbiter" placeholder="0x..." class="w-full px-4 py-3 border-2 border-[#9ECFD4] rounded-xl focus:border-[#016B61] focus:outline-none font-mono text-sm">
+                </div>
+
+                <div class="bg-[#E5E9C5] rounded-xl p-6">
+                    <h4 class="font-semibold text-[#016B61] mb-3">Deploy instrukcijos:</h4>
+                    <ol class="space-y-2 text-sm text-gray-700">
+                        <li>1. Nukopijuokite adresus aukščiau</li>
+                        <li>2. Atidarykite Remix IDE</li>
+                        <li>3. Deploy'inkite SecureRentalContract.sol</li>
+                        <li>4. Constructor parametruose įveskite adresus</li>
+                        <li>5. Grįžkite čia ir įveskite naują contract address</li>
+                    </ol>
+                </div>
+
+                <div class="flex gap-4">
+                    <button onclick="openRemix()" class="flex-1 bg-[#70B2B2] text-white px-6 py-3 rounded-xl font-semibold hover:shadow-xl hover-scale">
+                        Atidaryti Remix
+                    </button>
+                    <button onclick="closeDeployModal()" class="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-300">
+                        Atšaukti
+                    </button>
+                </div>
+
+                <div class="border-t-2 border-gray-200 pt-6">
+                    <h4 class="font-semibold text-[#016B61] mb-3">Jau deploy'inote? Įveskite naują adresą:</h4>
+                    <input type="text" id="new-contract-address" placeholder="0x..." class="w-full px-4 py-3 border-2 border-[#9ECFD4] rounded-xl focus:border-[#016B61] focus:outline-none font-mono text-sm mb-3">
+                    <button onclick="switchContract()" class="w-full gradient-primary text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl hover-scale">
+                        Perjungti į Naują Sutartį
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <footer class="bg-white/80 backdrop-blur-md border-t-2 border-[#016B61] mt-16 py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-gray-600 mb-2">Veikia Ethereum Sepolia Testnet tinkle</p>
+            <p class="text-sm text-gray-500">© 2025 RentChain. Decentralizuota Nuomos Platforma</p>
+        </div>
+    </footer>
+
+    <script src="dapp/script.js"></script>
+</body>
+</html>

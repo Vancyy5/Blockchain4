@@ -694,3 +694,48 @@ mano : https://sepolia.etherscan.io/address/0xE12d50b06Ea692d69d61163947565A29a4
 - **Code:** Sutarties kodas 
 
 ![etherscan](<nuotraukos/Screenshot 2025-12-16 010515.png>)
+
+
+## DAPP
+
+Sukurta decentralizuota internetinė aplikacija (dApp), kuri leidžia vartotojui
+sąveikauti su Ethereum tinkle (Sepolia testnet) veikiančia išmaniąja sutartimi.
+Aplikacija užtikrina pagrindinių verslo modelio funkcijų aktyvavimą, duomenų
+pateikimą ir nuskaitymą bei leidžia stebėti sutarties būseną ir atliktas operacijas.
+
+Šiai daliai deploy'inau naują sutartį, kad visą eigą parodyčiau ekrano nuotraukomis.
+
+```
+0xab6dfd207e01593f65EC4872A2fC47F58F186785 
+```
+
+Naudojimas:
+
+1. Nueiti terminale į savo katalogą
+
+2. (jeigu neturit)
+```bash
+npm install -g serve
+```
+3. serve
+
+4. su http://localhost:xxxx paleisti dapp aplankalą
+
+5. Prisijungti su savo metamask account'u
+
+![dapp](<nuotraukos/Screenshot 2025-12-17 191735.png>)
+![dapp](<nuotraukos/Screenshot 2025-12-17 181722.png>)
+![dapp](<nuotraukos/Screenshot 2025-12-17 181823.png>)
+![dapp](<nuotraukos/Screenshot 2025-12-17 185803.png>)
+![dapp](<nuotraukos/Screenshot 2025-12-16 010515.png>)
+![dapp](<nuotraukos/Screenshot 2025-12-17 185903.png>)
+![dapp](<nuotraukos/Screenshot 2025-12-17 190009.png>)
+![dapp](<nuotraukos/Screenshot 2025-12-17 190105.png>)
+![dapp](<nuotraukos/Screenshot 2025-12-17 190227.png>)
+![dapp](<nuotraukos/Screenshot 2025-12-17 190320.png>)
+![dapp](<nuotraukos/Screenshot 2025-12-17 190416.png>)
+![dapp](<nuotraukos/Screenshot 2025-12-17 190517.png>)
+![dapp](<nuotraukos/Screenshot 2025-12-17 190712.png>)
+![dapp](<nuotraukos/Screenshot 2025-12-17 193927.png>)
+![dapp](<nuotraukos/Screenshot 2025-12-17 193008.png>)
+
