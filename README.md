@@ -191,7 +191,7 @@ truffle test
 truffle console --network development
 ```
 
-Konsolėje galite vykdyti komandas:
+Konsolėje galite vykdyti šias komandas ir tas, kurios yra naudojimo pavyzdies skiltyje:
 ```javascript
 // Gauti deployed sutartį
 let contract = await SecureRentalContract.deployed()
@@ -202,23 +202,6 @@ let accounts = await web3.eth.getAccounts()
 // Patikrinti landlord
 let landlord = await contract.landlord()
 console.log("Landlord:", landlord)
-
-// Nuomininkas užsako nuomą
-await contract.placeOrder(12, "Modernus butas Vilniuje", {from: accounts[1]})
-
-// Nuomotojas nustato kainą
-await contract.setPrice(
-  web3.utils.toWei("1", "ether"),  // 1 ETH/mėn
-  web3.utils.toWei("2", "ether"),  // 2 ETH užstatas
-  {from: accounts[0]}
-)
-
-// Nuomininkas moka
-let totalPayment = web3.utils.toWei("3", "ether")
-await contract.payDeposit({from: accounts[1], value: totalPayment})
-
-// Pradėti sutartį
-await contract.startContract({from: accounts[0]})
 
 // Patikrinti sutarties būklę
 let info = await contract.getContractInfo()
@@ -249,7 +232,7 @@ startContract()
 
 # Naudojimo Pavyzdys 
 
-Truffle konsolėje galite naudoti šias funkcijas:
+Truffle konsolėje galite naudoti šias komandas:
 
 ## JavaScript (Truffle Console):
 
@@ -555,35 +538,6 @@ mano: https://sepolia.etherscan.io/address/0xE12d50b06Ea692d69d61163947565A29a47
 
 4. **Kvieskite funkcijas po vieną:**
 
-**a) placeOrder (Tenant wallet):**
-- Switch MetaMask į tenant wallet
-- Funkcija: `placeOrder`
-- `_durationMonths`: 6
-- `_description`: "Modern apartment in Vilnius"
-- Spauskite "Write" → Patvirtinkite MetaMask
-- ✅ **Transakcija #2 sukurta!**
-
-**b) setPrice (Landlord wallet):**
-- Switch MetaMask į landlord wallet
-- Funkcija: `setPrice`
-- `_monthlyRent`: 10000000000000000 (0.01 ETH in wei)
-- `_deposit`: 20000000000000000 (0.02 ETH)
-- Spauskite "Write"
-- ✅ **Transakcija #3 sukurta!**
-
-**c) payDeposit (Tenant wallet):**
-- Switch į tenant wallet
-- Funkcija: `payDeposit`
-- `payableAmount (ether)`: 0.03
-- Spauskite "Write"
-- ✅ **Transakcija #4 sukurta!**
-
-**d) startContract (Landlord wallet):**
-- Switch į landlord wallet
-- Funkcija: `startContract`
-- Spauskite "Write"
-- ✅ **Transakcija #5 sukurta!**
-
 ### Metodas 2: Truffle Console
 
 ### Metodas 2.1: Truffle Console patiems
@@ -670,4 +624,3 @@ npm install -g serve
 ![dapp](<nuotraukos/Screenshot 2025-12-17 190517.png>)
 ![dapp](<nuotraukos/Screenshot 2025-12-17 193927.png>)
 ![dapp](<nuotraukos/Screenshot 2025-12-17 193008.png>)
-
